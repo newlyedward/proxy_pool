@@ -42,7 +42,10 @@ class ProxyRefreshSchedule(ProxyManager):
         :return:
         """
         self.db.changeTable(self.raw_proxy_queue)
+
         raw_proxy = self.db.pop()
+
+
         self.log.info('%s start valid proxy' % time.ctime())
         while raw_proxy:
             if validUsefulProxy(raw_proxy):
@@ -82,7 +85,11 @@ def main(process_num=10):
 
 
 if __name__ == '__main__':
+    p = ProxyRefreshSchedule()
+    p.refresh()
+    p.valid_proxy()
+
     # main()
-    sched = BlockingScheduler()
-    sched.add_job(main, 'interval', minutes=10)
-    sched.start()
+    # sched = BlockingScheduler()
+    # sched.add_job(main, 'interval', minutes=10)
+    # sched.start()

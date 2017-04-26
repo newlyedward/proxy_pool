@@ -1,3 +1,9 @@
 .idea/
 *.pyc
 test/
+DB/__pycache__/
+Manager/__pycache__/
+ProxyGetter/__pycache__/
+Util/__pycache__/
+log/
+

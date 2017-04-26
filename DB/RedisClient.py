@@ -7,7 +7,7 @@ self.name为Redis中的一个key
 '''
 
 import json
-
+from Util.LogHandler import LogHandler
 import redis
 
 
@@ -26,13 +26,18 @@ class RedisClient(object):
         """
         self.name = name
         self.__conn = redis.Redis(host=host, port=port, db=0)
+        self.log = LogHandler('proxy_pool')
 
     def get(self):
         """
         get random result
         :return:
         """
-        return self.__conn.srandmember(name=self.name).decode('utf-8')         #redis return bytes
+        try:
+            return self.__conn.srandmember(name=self.name).decode('utf-8')         #redis return bytes
+        except:
+            self.log.info('%s is empty' % self.name)
+            return None
 
     def put(self, value):
         """
@@ -48,7 +53,11 @@ class RedisClient(object):
         pop an item
         :return:
         """
-        return self.__conn.spop(self.name).decode('utf-8')                    #redis return bytes
+        try:
+            return self.__conn.spop(self.name).decode('utf-8')                    #redis return bytes
+        except:
+            self.log.info('%s is empty' % self.name)
+            return None
 
     def delete(self, value):
         """

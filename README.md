@@ -36,11 +36,11 @@
 
 * DB:
 
-　　用于存放代理IP，现在暂时只支持SSDB。至于为什么选择SSDB，大家可以参考这篇[文章](https://www.sdk.cn/news/2684),个人觉得SSDB是个不错的Redis替代方案，如果你没有用过SSDB，安装起来也很简单，可以参考[这里](https://github.com/jhao104/memory-notes/blob/master/SSDB/SSDB%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95.md)；
+　　用于存放代理IP，现在暂时只支持redis，后期考虑加入mongo。因为后期打算使用框架scrapy和数据库mongo，所以干脆用redis，数据库选择不能太多。
 
 * Schedule:
 
-　　计划任务用户定时去检测DB中的代理可用性，删除不可用的代理。同时也会主动通过ProxyGetter去获取最新代理放入DB；
+　　考虑事件触发的方式去取代理，并验证其可用性。当可用代理数量低于某一个数值，（比如30，根据爬虫爬取数据的数量来确定）自动使用ProxyGetter取数据。
 
 * ProxyApi:
 
