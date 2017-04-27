@@ -15,6 +15,7 @@ __author__ = 'JHao'
 
 from DB.DbClient import DbClient
 from Util.GetConfig import GetConfig
+from Util.LogHandler import LogHandler
 from ProxyGetter.getFreeProxy import GetFreeProxy
 
 
@@ -27,6 +28,7 @@ class ProxyManager(object):
         self.db = DbClient()
         self.config = GetConfig()
         self.raw_proxy_queue = 'raw_proxy'
+        self.log = LogHandler('proxy_manager')
         self.useful_proxy_queue = 'useful_proxy'
 
     def refresh(self):
@@ -37,8 +39,9 @@ class ProxyManager(object):
         for proxyGetter in self.config.proxy_getter_functions:
             proxy_set = set()
             # fetch raw proxy
-            for proxy in getattr(GetFreeProxy, proxyGetter.strip())():   #get GetFreeProxy.freeProxyFirst and it is a iteration
+            for proxy in getattr(GetFreeProxy, proxyGetter.strip())():
                 if proxy.strip():
+                    self.log.info('{func}: fetch proxy {proxy}'.format(func=proxyGetter, proxy=proxy))
                     proxy_set.add(proxy.strip())
 
             # store raw proxy
@@ -74,10 +77,10 @@ class ProxyManager(object):
 
     def get_status(self):
         self.db.changeTable(self.raw_proxy_queue)
-        quan_raw_proxy = self.db.get_status()
+        total_raw_proxy = self.db.get_status()
         self.db.changeTable(self.useful_proxy_queue)
-        quan_useful_queue = self.db.get_status()
-        return {'raw_proxy': quan_raw_proxy, 'useful_proxy': quan_useful_queue}
+        total_useful_queue = self.db.get_status()
+        return {'raw_proxy': total_raw_proxy, 'useful_proxy': total_useful_queue}
 
 if __name__ == '__main__':
     pp = ProxyManager()

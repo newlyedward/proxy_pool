@@ -10,12 +10,13 @@
    Change Activity:
                    2016/12/4: 代理定时刷新
                    2017/03/06: 使用LogHandler添加日志
+                   2017/04/26: raw_proxy_queue验证通过但useful_proxy_queue中已经存在的代理不在放入
 -------------------------------------------------
 """
 
 import sys
 import time
-from multiprocessing import Process
+from threading import Thread
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 sys.path.append('../')
@@ -36,33 +37,29 @@ class ProxyRefreshSchedule(ProxyManager):
         ProxyManager.__init__(self)
         self.log = LogHandler('refresh_schedule')
 
-    def valid_proxy(self):
+    def validProxy(self):
         """
-        valid_proxy
+        验证raw_proxy_queue中的代理, 将可用的代理放入useful_proxy_queue
         :return:
         """
         self.db.changeTable(self.raw_proxy_queue)
-
         raw_proxy = self.db.pop()
-
-
         self.log.info('%s start valid proxy' % time.ctime())
         while raw_proxy:
             if validUsefulProxy(raw_proxy):
                 self.db.changeTable(self.useful_proxy_queue)
                 self.db.put(raw_proxy)
-                self.log.debug('proxy: %s validation passes' % raw_proxy)
+                self.log.info('validProxy_a: %s validation pass' % raw_proxy)
             else:
-                self.log.debug('proxy: %s validation fail' % raw_proxy)
-                pass
+                self.log.debug('validProxy_a: %s validation fail' % raw_proxy)
             self.db.changeTable(self.raw_proxy_queue)
             raw_proxy = self.db.pop()
-        self.log.info('%s valid proxy complete' % time.ctime())
+        self.log.info('%s validProxy_a complete' % time.ctime())
 
 
-def refresh_pool():
+def refreshPool():
     pp = ProxyRefreshSchedule()
-    pp.valid_proxy()
+    pp.validProxy()
 
 
 def main(process_num=10):
@@ -74,7 +71,7 @@ def main(process_num=10):
     # 检验新代理
     pl = []
     for num in range(process_num):
-        proc = Process(target=refresh_pool, args=())
+        proc = Thread(target=refreshPool, args=())
         pl.append(proc)
 
     for num in range(process_num):
